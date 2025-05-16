@@ -13,9 +13,9 @@ load_dotenv(dotenv_path)
 GROQ_API_URL = os.getenv("GROQ_API_URL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# ✅ Debugging information
-print("Loaded API URL:", GROQ_API_URL)
-print("Loaded API Key:", GROQ_API_KEY)
+# # ✅ Debugging information
+# print("Loaded API URL:", GROQ_API_URL)
+# print("Loaded API Key:", GROQ_API_KEY)
 
 if not GROQ_API_URL or not GROQ_API_KEY:
     st.error("API URL or API Key is missing. Please check your .env file.")
