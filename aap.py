@@ -1,22 +1,21 @@
-# app.py
-
 import streamlit as st
 import requests
 from dotenv import load_dotenv
 import os
 
-# Load environment
+# Load .env
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
+# Get API values
 GROQ_API_URL = os.getenv("GROQ_API_URL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# Page settings
+# Page config
 st.set_page_config(page_title="Groq CoPilot", page_icon="🤖", layout="wide")
 
-st.markdown(
-    """
+# Custom style
+st.markdown("""
     <style>
     .message-container {
         padding: 0.8em;
@@ -25,7 +24,7 @@ st.markdown(
     }
     .user-message {
         background-color: #1e1e1e;
-        color: #dcdcdc;
+        color: #ffffff;
         font-family: Consolas, monospace;
     }
     .bot-message {
@@ -34,29 +33,26 @@ st.markdown(
         font-family: Consolas, monospace;
     }
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
-# Show title
 st.title("🤖 Groq CoPilot")
-st.caption("AI-powered coding assistant")
+st.caption("AI-powered coding assistant (LLaMA 3.3 70B)")
 
-# Initialize session history
+# Initialize history
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# Chat input
-user_input = st.text_area("Enter your prompt:", height=100, placeholder="Ask about code, debug help, or tech questions...")
+# User input
+user_input = st.text_area("💬 Enter your prompt:", height=100, placeholder="Ask anything related to code, bugs, or tools...")
 
-# On send
+# On click send
 if st.button("🚀 Send"):
     if not GROQ_API_URL or not GROQ_API_KEY:
-        st.error("API URL or API Key is missing. Check your .env file.")
+        st.error("Missing API key or URL. Please set them in your .env file.")
     elif user_input.strip() == "":
-        st.warning("Please type something.")
+        st.warning("Enter a message before sending.")
     else:
-        with st.spinner("Generating response..."):
+        with st.spinner("Thinking..."):
             try:
                 response = requests.post(
                     GROQ_API_URL,
@@ -71,16 +67,15 @@ if st.button("🚀 Send"):
                 )
 
                 if response.status_code == 200:
-                    reply = response.json().get("choices", [{}])[0].get("message", {}).get("content", "No response.")
+                    reply = response.json()["choices"][0]["message"]["content"]
                     st.session_state.chat_history.append(("user", user_input))
                     st.session_state.chat_history.append(("bot", reply))
                 else:
-                    st.error(f"Error {response.status_code}: {response.text}")
-
+                    st.error(f"API Error {response.status_code}: {response.text}")
             except Exception as e:
-                st.error(f"API request failed: {str(e)}")
+                st.error(f"Request failed: {str(e)}")
 
-# Show chat history
+# Display chat history
 for role, message in reversed(st.session_state.chat_history):
     css_class = "user-message" if role == "user" else "bot-message"
     st.markdown(f'<div class="message-container {css_class}">{message}</div>', unsafe_allow_html=True)
